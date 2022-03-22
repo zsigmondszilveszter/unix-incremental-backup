@@ -1,0 +1,13 @@
+[Unit]
+Description=Run incremental backup task at shutdown
+DefaultDependencies=no
+Before=poweroff.target halt.target shutdown.target
+Conflicts=reboot.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /home/szilveszter/backup-scripts/incremental-backup.sh
+TimeoutStartSec=0
+
+[Install]
+WantedBy=shutdown.target
