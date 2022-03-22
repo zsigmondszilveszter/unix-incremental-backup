@@ -39,7 +39,7 @@ DONT_BACKUP_BEFORE_HOUR=17;
 # make sure we're running as root
 if (( `$ID -u` != 0 )); then { $ECHO "Sorry, must be root.  Exiting..."; exit; } fi
 
-# check wheter there is already a backup made today 
+# check if there is already a backup made today 
 currentHour=$($DATE "+%H")
 currentDate=$($DATE "+%m-%d-%Y")
 latestBackupChangeDate=$($DATE -r "$CURRENT_SNAPSHOT" "+%m-%d-%Y") 
