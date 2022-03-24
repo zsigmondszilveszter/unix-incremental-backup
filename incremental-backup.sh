@@ -13,6 +13,7 @@ ID=/usr/bin/id;
 ECHO=/usr/bin/echo;
 
 MOUNT=/usr/bin/mount;
+UMOUNT=/usr/bin/umount;
 RM=/usr/bin/rm;
 MV=/usr/bin/mv;
 CP=/usr/bin/cp;
@@ -97,10 +98,6 @@ $TOUCH $CURRENT_SNAPSHOT ;
 
 # and thats it for /.
 
-# now remount the RW snapshot mountpoint as readonly
-#$MOUNT -o remount,ro $MOUNT_DEVICE $SNAPSHOT_RW ;
-#if (( $? )); then
-#{
-	#$ECHO "snapshot: could not remount $SNAPSHOT_RW readonly";
-	#exit;
-#} fi;
+# we are after systemd unmount filesystems, 
+# it is better if we unmount the backup before the actual shutdown 
+$UMOUNT $MOUNT_DEVICE ;
