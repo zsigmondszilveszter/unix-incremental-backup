@@ -27,7 +27,7 @@ RSYNC=/usr/bin/rsync;
 # ------------- file locations -----------------------------------------
 
 MOUNT_DEVICE=/dev/sdb1;
-SNAPSHOT_RW=/backup;
+SNAPSHOT_RW=/mnt/backup;
 BACKUPDESTINATION=$SNAPSHOT_RW/snapshots;
 CURRENT_SNAPSHOT=$BACKUPDESTINATION/backup.latest;
 ONE_DAY_OLD_SNAPSHOT=$BACKUPDESTINATION/backup.one_day_old;
@@ -90,7 +90,8 @@ fi;
 $RSYNC								\
 	-va --delete --delete-excluded  \
     --exclude=/proc/* --exclude=/run/* --exclude=/sys/* \
-    --exclude=/dev/* --exclude=/tmp/* --exclude=/backup/* \
+    --exclude=/dev/* --exclude=/tmp/* --exclude=/mnt/* \
+    --exclude=/home/szilveszter/.cache/ \
 	$BACKUPTARGET $CURRENT_SNAPSHOT ;
 
 # step 5: update the mtime of backup.latest to reflect the snapshot time
