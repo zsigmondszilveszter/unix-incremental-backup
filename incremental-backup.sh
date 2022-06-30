@@ -26,14 +26,14 @@ RSYNC=/usr/bin/rsync;
 
 # ------------- file locations -----------------------------------------
 
-MOUNT_DEVICE=/dev/sdb1;
-SNAPSHOT_RW=/mnt/backup;
-BACKUPDESTINATION=$SNAPSHOT_RW/snapshots;
+MOUNT_DEVICE='e9fe952e-d2b9-4160-a149-b98d3cae348f';
+MOUNT_TARGET=/mnt/backup;
+BACKUPDESTINATION=$MOUNT_TARGET/snapshots;
 CURRENT_SNAPSHOT=$BACKUPDESTINATION/backup.latest;
 ONE_DAY_OLD_SNAPSHOT=$BACKUPDESTINATION/backup.one_day_old;
 TWO_DAYS_OLD_SNAPSHOT=$BACKUPDESTINATION/backup.two_days_old;
 BACKUPTARGET=/;
-DONT_BACKUP_BEFORE_HOUR=17;
+DONT_BACKUP_BEFORE_HOUR=16;
 
 # ------------- the script itself --------------------------------------
 
@@ -46,7 +46,7 @@ currentDate=$($DATE "+%m-%d-%Y")
 latestBackupChangeDate=$($DATE -r "$CURRENT_SNAPSHOT" "+%m-%d-%Y") 
 if [[ $currentHour < $DONT_BACKUP_BEFORE_HOUR || $currentDate == $latestBackupChangeDate ]]
 then
-    echo "There is already a backup made today. Exiting..."
+    echo "We are before the permitted hour to create a new snapshot or there is already a backup made today. Exiting..."
     exit 0
 else 
     echo "Creating the daily incremental backup..."
@@ -54,17 +54,17 @@ fi;
 
 
 # attempt to remount the RW mount point as RW; else abort
-$MOUNT -o remount,rw $MOUNT_DEVICE $SNAPSHOT_RW ;
+$MOUNT -o remount,rw UUID=$MOUNT_DEVICE $MOUNT_TARGET ;
 if (( $? )); then
 {
-	$ECHO "snapshot: could not remount $SNAPSHOT_RW readwrite";
+	$ECHO "snapshot: could not remount $MOUNT_TARGET readwrite";
 	exit;
 }
 fi;
 
 # rotating snapshots of / (fixme: this should be more general)
 
-# step 0: check if SNAPSHOT_RW directory exists
+# step 0: check if MOUNT_TARGET directory exists
 [ -d "$BACKUPDESTINATION" ] || $MKDIR -p $BACKUPDESTINATION ; 
 
 # step 1: delete the oldest snapshot, if it exists:
@@ -92,6 +92,7 @@ $RSYNC								\
     --exclude=/proc/* --exclude=/run/* --exclude=/sys/* \
     --exclude=/dev/* --exclude=/tmp/* --exclude=/mnt/* \
     --exclude=/home/szilveszter/.cache/ \
+    --exclude=/home/szilveszter/Downloads/ \
 	$BACKUPTARGET $CURRENT_SNAPSHOT ;
 
 # step 5: update the mtime of backup.latest to reflect the snapshot time
@@ -101,4 +102,4 @@ $TOUCH $CURRENT_SNAPSHOT ;
 
 # we are after systemd unmount filesystems, 
 # it is better if we unmount the backup before the actual shutdown 
-$UMOUNT $MOUNT_DEVICE ;
+$UMOUNT $MOUNT_TARGET ;
